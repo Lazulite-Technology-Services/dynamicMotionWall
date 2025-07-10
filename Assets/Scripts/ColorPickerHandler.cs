@@ -38,7 +38,7 @@ public class ColorPickerHandler : MonoBehaviour
         newColor = HexToColor(GameManager.instance.FlColorPicker.hexInput.text);
 
         if (GameManager.instance.isAnimate)
-            GameManager.instance.hexValue = colval = $"{newColor.r},{newColor.g},{newColor.b}#";
+            GameManager.instance.hexValue = colval = $"*{newColor.r},{newColor.g},{newColor.b}#";
         else
         {
             if(GameManager.instance.ProductButtonIndex == 1)

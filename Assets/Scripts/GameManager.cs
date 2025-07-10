@@ -39,7 +39,7 @@ public class GameManager : MonoBehaviour
 
     #endregion
 
-    private bool isPressed = false;
+    private bool isPressed = true;
     public bool isAnimate = false;
 
     #region BUTTON COMMAND VALUES
@@ -128,7 +128,6 @@ public class GameManager : MonoBehaviour
     {
         if(ColorPickerPanel.activeSelf)
         {
-
             ColorPickerPanel.SetActive(false);
         }
         else
@@ -142,6 +141,9 @@ public class GameManager : MonoBehaviour
         isAnimate = true;
         CurrentButtonCommand = command;
 
+        brightnessSlider_Object.SetActive(true);
+        animSpeedSlider_Object.SetActive(true);
+
         SendCommandToArduino(command);
     }
 
@@ -152,11 +154,11 @@ public class GameManager : MonoBehaviour
             isAnimate = false;
             ProductButtonIndex = 1;
 
-            if (!isPressed)
+            if (isPressed)
             {
-                isPressed = true;
+                //isPressed = true;
                 product_1_Command = "*1-S#";
-                product_2.interactable = false;
+                //product_2.interactable = false;
                 ColorPickerPanel.SetActive(true);
 
                 SendCommandToArduino("*1-S#");
@@ -164,28 +166,28 @@ public class GameManager : MonoBehaviour
                 brightnessSlider_Object.SetActive(false);
                 animSpeedSlider_Object.SetActive(false);
             }
-            else
-            {
-                isPressed = false;
-                product_1_Command = "*1-D#";
-                product_2.interactable = true;
+            //else
+            //{
+            //    isPressed = false;
+            //    product_1_Command = "*1-D#";
+            //    product_2.interactable = true;
 
-                SendCommandToArduino("*1-D#");
+            //    SendCommandToArduino("*1-D#");
 
-                brightnessSlider_Object.SetActive(true);
-                animSpeedSlider_Object.SetActive(true);
-            }
+            //    brightnessSlider_Object.SetActive(true);
+            //    animSpeedSlider_Object.SetActive(true);
+            //}
         }
         else if (btn.name == "Product_2")
         {
             isAnimate = false;
             ProductButtonIndex = 2;
 
-            if (!isPressed)
+            if (isPressed)
             {
-                isPressed = true;
+                //isPressed = true;
                 product_1_Command = "*2-S#";
-                product_1.interactable = false;
+                //product_1.interactable = false;
                 ColorPickerPanel.SetActive(true);
 
                 SendCommandToArduino("*2-S#");
@@ -193,17 +195,17 @@ public class GameManager : MonoBehaviour
                 brightnessSlider_Object.SetActive(false);
                 animSpeedSlider_Object.SetActive(false);
             }
-            else
-            {
-                isPressed = false;
-                product_1_Command = "*2-D#";
-                product_1.interactable = true;
+            //else
+            //{
+            //    isPressed = false;
+            //    product_1_Command = "*2-D#";
+            //    product_1.interactable = true;
 
-                SendCommandToArduino("*2-D#");
+            //    SendCommandToArduino("*2-D#");
 
-                brightnessSlider_Object.SetActive(true);
-                animSpeedSlider_Object.SetActive(true);
-            }
+            //    brightnessSlider_Object.SetActive(true);
+            //    animSpeedSlider_Object.SetActive(true);
+            //}
         }
     }
 
@@ -218,6 +220,8 @@ public class GameManager : MonoBehaviour
                 back.gameObject.SetActive(false);
                 break;
             case ScreenState.animate:
+                isAnimate = true;
+                
                 screensArray[2].SetActive(false);
                 screensArray[1].SetActive(true);
                 currentState = ScreenState.animatOrProduct;
