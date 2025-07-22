@@ -25,7 +25,7 @@ public class BluetoothManager : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-        PlayerPrefs.SetString("BT_Device", deviceName);
+        //PlayerPrefs.SetString("BT_Device", deviceName);
     }
 
     void Start()

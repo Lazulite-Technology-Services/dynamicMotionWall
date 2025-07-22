@@ -1,3 +1,4 @@
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -25,22 +26,36 @@ public class GameManager : MonoBehaviour
     private GameObject[] screensArray;
 
     [SerializeField]
-    private GameObject brightnessSlider_Object, animSpeedSlider_Object;
+    private GameObject brightnessSlider_Object, animSpeedSlider_Object, commandPanel, columnSelectionPanel;
 
     #endregion
 
     #region UI ELEMENTS
 
     [SerializeField]
-    private Button[] buttonsArray;
+    private Button[] productButtonsArray;
+    [SerializeField]
+    private Button[] productColumnButtonsArray;
 
     [SerializeField]
-    private Button back, product_1, product_2;
+    private Button back, product_1, product_2, saveBluetoothName, openCommandPanel, singleSelection, columnSelection;
+
+    [SerializeField]
+    private TMP_InputField bluetoothName;
 
     #endregion
 
     private bool isPressed = true;
     public bool isAnimate = false;
+    [SerializeField]
+    public bool isSingle = true;
+    [SerializeField]
+    public string columnNumber = string.Empty;
+
+    [SerializeField]
+    private int productBtnCount = 0;
+
+    public int selectedProductButtonIndex = 0;
 
     #region BUTTON COMMAND VALUES
 
@@ -59,7 +74,7 @@ public class GameManager : MonoBehaviour
 
     private enum ScreenState
     {
-        enter, animatOrProduct, animate, product
+        enter, animatOrProduct, animate, product, productselection
     };
 
     [SerializeField] private ScreenState currentState;
@@ -75,18 +90,36 @@ public class GameManager : MonoBehaviour
         instance = this;       
 
         back.onClick.AddListener(Back);
+        singleSelection.onClick.AddListener(SingleSelectionProductView);
+        columnSelection.onClick.AddListener(MultipleSelectionColumnView);
+
+        
         currentState = ScreenState.enter;
         back.gameObject.SetActive(false);
+
+        //for(int i = 0; i < productColumnButtonsArray.Length; i++)
+        //{
+        //    productColumnButtonsArray[i].onClick.AddListener(EnableorDisableColorPickerPanel);
+        //}
     }    
 
-    private void SendHexCode()
+    private void EnableOrDisableCommandPanel()
     {
-        
+        if (commandPanel.activeSelf)
+        {
+            commandPanel.SetActive(false);
+        }
+        else
+        {
+            PlayerPrefs.SetString("BT_Device", bluetoothName.text);
+            commandPanel.SetActive(true);
+        }
     }
 
     public void SendCommandToArduino(string command)
     {
         BluetoothManager.Instance.SendBTMessage(command);
+        Debug.Log($"the command sent : {command}");
     }
 
     public void EnableNextScreen(int index)
@@ -112,6 +145,12 @@ public class GameManager : MonoBehaviour
                 screensArray[3].SetActive(true);
 
                 currentState = ScreenState.product;
+                break;
+            case 4:
+                screensArray[3].SetActive(false);
+                screensArray[4].SetActive(true);
+
+                currentState = ScreenState.productselection;
                 break;
             default:
                 Debug.Log($"no such screen : {index}");
@@ -147,65 +186,69 @@ public class GameManager : MonoBehaviour
         SendCommandToArduino(command);
     }
 
-    public void  SelectOrDeselectProductButtons(Button btn)
+    public void SelectOrDeselectProductButtons(Button btn)
     {
-        if(btn.name == "Product_1")
+        ColorPickerPanel.SetActive(true);
+        brightnessSlider_Object.SetActive(false);
+        animSpeedSlider_Object.SetActive(false);
+
+        isAnimate = false;
+
+        if (isSingle)
         {
-            isAnimate = false;
-            ProductButtonIndex = 1;
-
-            if (isPressed)
-            {
-                //isPressed = true;
-                product_1_Command = "*1-S#";
-                //product_2.interactable = false;
-                ColorPickerPanel.SetActive(true);
-
-                SendCommandToArduino("*1-S#");
-
-                brightnessSlider_Object.SetActive(false);
-                animSpeedSlider_Object.SetActive(false);
-            }
-            //else
-            //{
-            //    isPressed = false;
-            //    product_1_Command = "*1-D#";
-            //    product_2.interactable = true;
-
-            //    SendCommandToArduino("*1-D#");
-
-            //    brightnessSlider_Object.SetActive(true);
-            //    animSpeedSlider_Object.SetActive(true);
-            //}
+            Debug.Log("enabling color panel in single");
+            ProductButtonIndex = int.Parse(btn.name);            
         }
-        else if (btn.name == "Product_2")
+        else
         {
-            isAnimate = false;
-            ProductButtonIndex = 2;
+            Debug.Log("enabling color panel in single");
+            columnNumber = $"c{btn.name}";
+        }
+    }
 
-            if (isPressed)
-            {
-                //isPressed = true;
-                product_1_Command = "*2-S#";
-                //product_1.interactable = false;
-                ColorPickerPanel.SetActive(true);
+    private void SingleSelectionProductView()
+    {
+        isSingle = true;
+        EnableNextScreen(4);
+        columnSelectionPanel.SetActive(false);
+        Debug.Log("Issingle is : " + isSingle);
+    }
 
-                SendCommandToArduino("*2-S#");
+    private void MultipleSelectionColumnView()
+    {
+        isSingle = false;
+        EnableNextScreen(4);
+        columnSelectionPanel.SetActive(true);
 
-                brightnessSlider_Object.SetActive(false);
-                animSpeedSlider_Object.SetActive(false);
-            }
-            //else
-            //{
-            //    isPressed = false;
-            //    product_1_Command = "*2-D#";
-            //    product_1.interactable = true;
+        for(int i = 0; i < productButtonsArray.Length; i++)
+        {
+            productButtonsArray[i].enabled = false;
+            productButtonsArray[i].GetComponent<Image>().enabled = false;
+            productButtonsArray[i].transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = string.Empty;
+        }
 
-            //    SendCommandToArduino("*2-D#");
+        Debug.Log("Issingle is : " + isSingle);
+    }
 
-            //    brightnessSlider_Object.SetActive(true);
-            //    animSpeedSlider_Object.SetActive(true);
-            //}
+    private void OnColumnSelected_SendCommand(int index)
+    {
+        columnNumber = index.ToString();
+    }
+
+    public bool isSetDefaultColor = false;
+
+    public void ColorToggleButtonProperty(Toggle toggle)
+    {
+        //Enable the color panel
+        if(toggle.isOn)
+        {
+            isSetDefaultColor = true;
+            EnableorDisableColorPickerPanel();
+        }
+        else
+        {
+            isSetDefaultColor = false;
+            SendCommandToArduino("*a#");
         }
     }
 
@@ -231,10 +274,27 @@ public class GameManager : MonoBehaviour
                 screensArray[1].SetActive(true);
                 currentState = ScreenState.animatOrProduct;
                 break;
+            case ScreenState.productselection:
+                screensArray[4].SetActive(false);
+                screensArray[3].SetActive(true);
+                ResetProductButtonArray();
+
+                currentState = ScreenState.product;
+                break;
             default:
                 break;
         }
         
+    }
+
+    private void ResetProductButtonArray()
+    {
+        for (int i = 0; i < productButtonsArray.Length; i++)
+        {
+            productButtonsArray[i].enabled = true;
+            productButtonsArray[i].GetComponent<Image>().enabled = true;
+            productButtonsArray[i].transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = (i + 1).ToString();
+        }
     }
 
     
