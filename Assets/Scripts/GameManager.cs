@@ -38,7 +38,7 @@ public class GameManager : MonoBehaviour
     private Button[] productColumnButtonsArray;
 
     [SerializeField]
-    private Button back, product_1, product_2, saveBluetoothName, openCommandPanel, singleSelection, columnSelection;
+    private Button back, product_1, product_2, saveBluetoothName, openCommandPanel, singleSelection, columnSelection, ResetButton;
 
     [SerializeField]
     private TMP_InputField bluetoothName;
@@ -92,6 +92,7 @@ public class GameManager : MonoBehaviour
         back.onClick.AddListener(Back);
         singleSelection.onClick.AddListener(SingleSelectionProductView);
         columnSelection.onClick.AddListener(MultipleSelectionColumnView);
+        ResetButton.onClick.AddListener(() => SendCommandToArduino("*reset#"));
 
         
         currentState = ScreenState.enter;
@@ -132,6 +133,7 @@ public class GameManager : MonoBehaviour
                 screensArray[1].SetActive(true);
                 screensArray[0].SetActive(false);
                 back.gameObject.SetActive(true);
+                ResetButton.gameObject.SetActive(false);
                 currentState = ScreenState.animatOrProduct;
                 break;
             case 2:
@@ -259,6 +261,7 @@ public class GameManager : MonoBehaviour
             case ScreenState.animatOrProduct:
                 screensArray[1].SetActive(false);
                 screensArray[0].SetActive(true);
+                ResetButton.gameObject.SetActive(true);
                 currentState = ScreenState.enter;
                 back.gameObject.SetActive(false);
                 break;
