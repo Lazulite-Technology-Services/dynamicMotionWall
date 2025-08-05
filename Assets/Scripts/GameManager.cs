@@ -43,6 +43,9 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private TMP_InputField bluetoothName;
 
+    [SerializeField]
+    private TextMeshProUGUI commandText;
+
     #endregion
 
     private bool isPressed = true;
@@ -74,7 +77,7 @@ public class GameManager : MonoBehaviour
 
     private enum ScreenState
     {
-        enter, animatOrProduct, animate, product, productselection
+        enter, animatOrProduct, animate, product, productselection, onlyanimation
     };
 
     [SerializeField] private ScreenState currentState;
@@ -93,7 +96,6 @@ public class GameManager : MonoBehaviour
         singleSelection.onClick.AddListener(SingleSelectionProductView);
         columnSelection.onClick.AddListener(MultipleSelectionColumnView);
         ResetButton.onClick.AddListener(() => SendCommandToArduino("*reset#"));
-
         
         currentState = ScreenState.enter;
         back.gameObject.SetActive(false);
@@ -120,6 +122,7 @@ public class GameManager : MonoBehaviour
     public void SendCommandToArduino(string command)
     {
         BluetoothManager.Instance.SendBTMessage(command);
+        //commandText.text = command; 
         Debug.Log($"the command sent : {command}");
     }
 
@@ -153,6 +156,10 @@ public class GameManager : MonoBehaviour
                 screensArray[4].SetActive(true);
 
                 currentState = ScreenState.productselection;
+                break;
+            case 5:
+                screensArray[5].SetActive(true);
+                currentState = ScreenState.onlyanimation;
                 break;
             default:
                 Debug.Log($"no such screen : {index}");
@@ -198,12 +205,13 @@ public class GameManager : MonoBehaviour
 
         if (isSingle)
         {
-            Debug.Log("enabling color panel in single");
+            //Debug.Log("enabling color panel in single");
             ProductButtonIndex = int.Parse(btn.name);            
+            Debug.Log(ProductButtonIndex);
         }
         else
         {
-            Debug.Log("enabling color panel in single");
+            //Debug.Log("enabling color panel in single");
             columnNumber = $"c{btn.name}";
         }
     }
@@ -249,7 +257,8 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            isSetDefaultColor = false;
+            //isSetDefaultColor = false;
+            commandText.text = "*a#";
             SendCommandToArduino("*a#");
         }
     }
@@ -283,6 +292,11 @@ public class GameManager : MonoBehaviour
                 ResetProductButtonArray();
 
                 currentState = ScreenState.product;
+                break;
+            case ScreenState.onlyanimation:
+                screensArray[5].SetActive(false);
+                screensArray[1].SetActive(true);
+                currentState = ScreenState.animatOrProduct;
                 break;
             default:
                 break;

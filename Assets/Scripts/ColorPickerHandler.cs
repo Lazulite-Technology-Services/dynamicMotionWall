@@ -40,10 +40,10 @@ public class ColorPickerHandler : MonoBehaviour
         if (GameManager.instance.isSetDefaultColor)
         {
             GameManager.instance.hexValue = colval = $"*L,{newColor.r},{newColor.g},{newColor.b}#";
+            GameManager.instance.isSetDefaultColor = false;
         }
         else
         {
-
             if (GameManager.instance.isAnimate)
             {
                 GameManager.instance.hexValue = colval = $"*{newColor.r},{newColor.g},{newColor.b}#";
